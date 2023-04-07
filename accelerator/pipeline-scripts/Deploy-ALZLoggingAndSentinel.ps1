@@ -15,7 +15,7 @@ param (
 # Parameters necessary for deployment
 $inputObject = @{
   DeploymentName        = 'alz-LoggingDeploy-{0}' -f ( -join (Get-Date -Format 'yyyyMMddTHHMMssffffZ')[0..63])
-  ResourceGroupName     = "rg-$TopLevelMGPrefix-logging-001"
+  ResourceGroupName     = "rg-$TopLevelMGPrefix-logging"
   TemplateFile          = $TemplateFile
   TemplateParameterFile = $TemplateParameterFile
   Verbose               = $true
