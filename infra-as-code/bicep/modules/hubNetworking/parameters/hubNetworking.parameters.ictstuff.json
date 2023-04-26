@@ -9,7 +9,7 @@
       "value": "alz"
     },
     "parHubNetworkName": {
-      "value": "alz-hub-westeurope"
+      "value": "alz-hub-weu"
     },
     "parHubNetworkAddressPrefix": {
       "value": "172.20.0.0/16"
@@ -21,7 +21,7 @@
           "ipAddressRange": "172.20.0.0/24"
         },
         {
-          "name": "ManagementSubnet",
+          "name": "snet-mgmt-shd",
           "ipAddressRange": "172.20.1.0/24"
         },
         {
@@ -39,6 +39,12 @@
     },
     "parPublicIpSku": {
       "value": "Standard"
+    },
+    "parPublicIpPrefix": {
+      "value": "pip"
+    },
+    "parPublicIpSuffix": {
+      "value": ""
     },
     "parAzBastionEnabled": {
       "value": true
@@ -62,10 +68,10 @@
       "value": false
     },
     "parAzFirewallName": {
-      "value": "alz-azfw-eastus"
+      "value": "alz-azfw-weu"
     },
     "parAzFirewallPoliciesName": {
-      "value": "alz-azfwpolicy-eastus"
+      "value": "alz-azfwpolicy-weu"
     },
     "parAzFirewallTier": {
       "value": "Standard"
