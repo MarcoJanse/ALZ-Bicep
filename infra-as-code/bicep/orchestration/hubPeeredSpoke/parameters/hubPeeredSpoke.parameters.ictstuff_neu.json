@@ -1,0 +1,65 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "parLocation": {
+      "value": "northeurope"
+    },
+    "parTopLevelManagementGroupPrefix": {
+      "value": "alz"
+    },
+    "parTopLevelManagementGroupSuffix": {
+      "value": "-mg"
+    },
+    "parPeeredVnetSubscriptionId": {
+      "value": "30ff91cf-356d-4e30-b506-7687c4599923"
+    },
+    "parPeeredVnetSubscriptionMgPlacement": {
+      "value": "alz-platform-mg"
+    },
+    "parResourceGroupNameForSpokeNetworking": {
+      "value": "rg-lzne-spokenetworking-shd-001"
+    },
+    "parDdosProtectionPlanId": {
+      "value": ""
+    },
+    "parSpokeNetworkName": {
+      "value": "vnet-spoke-neu"
+    },
+    "parSpokeNetworkAddressPrefix": {
+      "value": "172.21.0.0/16"
+    },
+    "parDnsServerIps": {
+      "value": []
+    },
+    "parNextHopIpAddress": {
+      "value": ""
+    },
+    "parDisableBgpRoutePropagation": {
+      "value": false
+    },
+    "parSpoketoHubRouteTableName": {
+      "value": "rt-spoke-neu-to-hub"
+    },
+    "parHubVirtualNetworkId": {
+      "value": "/subscriptions/30ff91cf-356d-4e30-b506-7687c4599923/resourceGroups/rg-hubnetworking-shd-001/providers/Microsoft.Network/virtualNetworks/vnet-hub-weu"
+    },
+    "parAllowSpokeForwardedTraffic": {
+      "value": false
+    },
+    "parAllowHubVPNGatewayTransit": {
+      "value": true
+    },
+    "parTags": {
+      "value": {
+        "Application": "Azure Landing Zone - North Europe",
+        "Deployment": "Bicep",
+        "Environment": "shared",
+        "Owner": "Marco Janse"
+      }
+    },
+    "parTelemetryOptOut": {
+      "value": false
+    }
+  }
+}
