@@ -9,7 +9,7 @@
       "value": "alz"
     },
     "parHubNetworkName": {
-      "value": "alz-hub-weu"
+      "value": "vnet-hub-weu"
     },
     "parHubNetworkAddressPrefix": {
       "value": "172.20.0.0/16"
