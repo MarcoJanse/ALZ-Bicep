@@ -13,19 +13,31 @@ param parHubNetworkName string = '${parCompanyPrefix}-hub-${parLocation}'
 @sys.description('The IP address range for all virtual networks to use.')
 param parHubNetworkAddressPrefix string = '10.10.0.0/16'
 
-@sys.description('The name and IP address range for each subnet in the virtual networks.')
+@sys.description('The name, IP address range, network security group and route table for each subnet in the virtual networks.')
 param parSubnets array = [
   {
     name: 'AzureBastionSubnet'
     ipAddressRange: '10.10.15.0/24'
+    networkSecurityGroupId: ''
+    routeTableId: ''
   }
   {
     name: 'GatewaySubnet'
     ipAddressRange: '10.10.252.0/24'
+    networkSecurityGroupId: ''
+    routeTableId: ''
   }
   {
     name: 'AzureFirewallSubnet'
     ipAddressRange: '10.10.254.0/24'
+    networkSecurityGroupId: ''
+    routeTableId: ''
+  }
+  {
+    name: 'AzureFirewallManagementSubnet'
+    ipAddressRange: '10.10.253.0/24'
+    networkSecurityGroupId: ''
+    routeTableId: ''
   }
 ]
 
@@ -74,6 +86,7 @@ param parAzFirewallPoliciesName string = '${parCompanyPrefix}-azfwpolicy-${parLo
 
 @sys.description('Azure Firewall Tier associated with the Firewall to deploy.')
 @allowed([
+  'Basic'
   'Standard'
   'Premium'
 ])
@@ -240,14 +253,28 @@ param parTags object = {}
 param parTelemetryOptOut bool = false
 
 @sys.description('Define outbound destination ports or ranges for SSH or RDP that you want to access from Azure Bastion.')
-param parBastionOutboundSshRdpPorts array = ['22','3389']
+param parBastionOutboundSshRdpPorts array = [ '22', '3389' ]
 
-var varSubnetProperties = [for subnet in parSubnets: {
+var varSubnetMap = map(range(0, length(parSubnets)), i => {
+    name: parSubnets[i].name
+    ipAddressRange: parSubnets[i].ipAddressRange
+    networkSecurityGroupId: contains(parSubnets[i], 'networkSecurityGroupId') ? parSubnets[i].networkSecurityGroupId : ''
+    routeTableId: contains(parSubnets[i], 'routeTableId') ? parSubnets[i].routeTableId : ''
+  })
+
+var varSubnetProperties = [for subnet in varSubnetMap: {
   name: subnet.name
   properties: {
     addressPrefix: subnet.ipAddressRange
-    networkSecurityGroup: subnet.name != 'AzureBastionSubnet' ? null : {
+
+    networkSecurityGroup: (subnet.name == 'AzureBastionSubnet') ? {
       id: '${resourceGroup().id}/providers/Microsoft.Network/networkSecurityGroups/${parAzBastionNsgName}'
+    } : (!empty(subnet.networkSecurityGroupId)) ? {
+      id: subnet.networkSecurityGroupId
+    } : null
+
+    routeTable: (empty(subnet.routeTableId)) ? null : {
+      id: subnet.routeTableId
     }
   }
 }]
@@ -561,6 +588,11 @@ resource resAzureFirewallSubnetRef 'Microsoft.Network/virtualNetworks/subnets@20
   name: 'AzureFirewallSubnet'
 }
 
+resource resAzureFirewallMgmtSubnetRef 'Microsoft.Network/virtualNetworks/subnets@2021-08-01' existing = if (parAzFirewallEnabled && (contains(map(parSubnets, subnets => subnets.name), 'AzureFirewallManagementSubnet'))) {
+  parent: resHubVnet
+  name: 'AzureFirewallManagementSubnet'
+}
+
 module modAzureFirewallPublicIp '../publicIp/publicIp.bicep' = if (parAzFirewallEnabled) {
   name: 'deploy-Firewall-Public-IP'
   params: {
@@ -579,11 +611,33 @@ module modAzureFirewallPublicIp '../publicIp/publicIp.bicep' = if (parAzFirewall
   }
 }
 
+module modAzureFirewallMgmtPublicIp '../publicIp/publicIp.bicep' = if (parAzFirewallEnabled && (contains(map(parSubnets, subnets => subnets.name), 'AzureFirewallManagementSubnet'))) {
+  name: 'deploy-Firewall-mgmt-Public-IP'
+  params: {
+    parLocation: parLocation
+    parAvailabilityZones: parAzFirewallAvailabilityZones
+    parPublicIpName: '${parPublicIpPrefix}${parAzFirewallName}-mgmt${parPublicIpSuffix}'
+    parPublicIpProperties: {
+      publicIpAddressVersion: 'IPv4'
+      publicIpAllocationMethod: 'Static'
+    }
+    parPublicIpSku: {
+      name: 'Standard'
+    }
+    parTags: parTags
+    parTelemetryOptOut: parTelemetryOptOut
+  }
+}
+
 resource resFirewallPolicies 'Microsoft.Network/firewallPolicies@2021-08-01' = if (parAzFirewallEnabled) {
   name: parAzFirewallPoliciesName
   location: parLocation
   tags: parTags
-  properties: {
+  properties: (parAzFirewallTier == 'Basic') ? {
+    sku: {
+      tier: parAzFirewallTier
+    }
+  } : {
     dnsSettings: {
       enableProxy: parAzFirewallDnsProxyEnabled
     }
@@ -596,11 +650,46 @@ resource resFirewallPolicies 'Microsoft.Network/firewallPolicies@2021-08-01' = i
 // AzureFirewallSubnet is required to deploy Azure Firewall . This subnet must exist in the parsubnets array if you deploy.
 // There is a minimum subnet requirement of /26 prefix.
 resource resAzureFirewall 'Microsoft.Network/azureFirewalls@2021-08-01' = if (parAzFirewallEnabled) {
+  dependsOn: [
+    resGateway
+  ]
   name: parAzFirewallName
   location: parLocation
   tags: parTags
   zones: (!empty(parAzFirewallAvailabilityZones) ? parAzFirewallAvailabilityZones : [])
-  properties: {
+  properties: parAzFirewallTier == 'Basic' ? {
+    ipConfigurations: [
+      {
+        name: 'ipconfig1'
+        properties: {
+          subnet: {
+            id: resAzureFirewallSubnetRef.id
+          }
+          publicIPAddress: {
+            id: parAzFirewallEnabled ? modAzureFirewallPublicIp.outputs.outPublicIpId : ''
+          }
+        }
+      }
+    ]
+    managementIpConfiguration: {
+      name: 'mgmtIpConfig'
+      properties: {
+        publicIPAddress: {
+          id: parAzFirewallEnabled ? modAzureFirewallMgmtPublicIp.outputs.outPublicIpId : ''
+        }
+        subnet: {
+          id: resAzureFirewallMgmtSubnetRef.id
+        }
+      }
+    }
+    sku: {
+      name: 'AZFW_VNet'
+      tier: parAzFirewallTier
+    }
+    firewallPolicy: {
+      id: resFirewallPolicies.id
+    }
+  } : {
     ipConfigurations: [
       {
         name: 'ipconfig1'
