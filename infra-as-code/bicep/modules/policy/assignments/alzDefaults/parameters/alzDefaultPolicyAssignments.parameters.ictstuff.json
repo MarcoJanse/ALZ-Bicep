@@ -29,6 +29,9 @@
     "parPrivateDnsResourceGroupId": {
       "value": "/subscriptions/30ff91cf-356d-4e30-b506-7687c4599923/resourceGroups/rg-hubnetworking-shared-001"
     },
+    "parPrivateDnsZonesNamesToAuditInCorp": {
+      "value": []
+    },
     "parDisableAlzDefaultPolicies": {
       "value": false
     },
@@ -37,7 +40,13 @@
     },
     "parVmBackupExclusionTagValue" : {
       "value": [
-        "NoBackupPolicy"
+        "ExcludedFromBackup"
+      ]
+    },
+    "parExcludedPolicyAssignments": {
+      "value": [
+        "Deny-Public-IP",
+        "Enable-DDoS-VNET"
       ]
     },
     "parTelemetryOptOut": {
