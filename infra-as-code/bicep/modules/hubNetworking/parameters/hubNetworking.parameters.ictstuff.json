@@ -18,15 +18,27 @@
       "value": [
         {
           "name": "AzureBastionSubnet",
-          "ipAddressRange": "172.20.0.0/24"
+          "ipAddressRange": "172.20.0.0/24",
+          "networkSecurityGroupId": "",
+          "routeTableId": ""
         },
         {
           "name": "GatewaySubnet",
-          "ipAddressRange": "172.20.254.0/24"
+          "ipAddressRange": "172.20.254.0/24",
+          "networkSecurityGroupId": "",
+          "routeTableId": ""
         },
         {
           "name": "AzureFirewallSubnet",
-          "ipAddressRange": "172.20.255.0/24"
+          "ipAddressRange": "172.20.255.0/24",
+          "networkSecurityGroupId": "",
+          "routeTableId": ""
+        },
+        {
+          "name": "AzureFirewallManagementSubnet",
+          "ipAddressRange": "172.20.253.0/24",
+          "networkSecurityGroupId": "",
+          "routeTableId": ""
         }
       ]
     },
@@ -163,6 +175,9 @@
         "privatelink.web.core.windows.net",
         "privatelink.webpubsub.azure.com"
       ]
+    },
+    "parPrivateDnsZoneAutoMergeAzureBackupZone": {
+      "value": true
     },
     "parVpnGatewayConfig": {
       "value": {
