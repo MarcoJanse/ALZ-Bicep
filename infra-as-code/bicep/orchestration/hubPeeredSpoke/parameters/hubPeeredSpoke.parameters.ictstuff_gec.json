@@ -32,6 +32,9 @@
     "parDnsServerIps": {
       "value": []
     },
+    "parPrivateDnsZoneResourceIds":{
+      "value": []
+    },
     "parNextHopIpAddress": {
       "value": ""
     },
