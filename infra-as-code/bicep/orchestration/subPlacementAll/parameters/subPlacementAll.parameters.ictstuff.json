@@ -43,6 +43,9 @@
     "parLandingZoneMgChildrenSubs": {
       "value": {}
     },
+    "parPlatformMgChildrenSubs": {
+      "value": {}
+    },
     "parDecommissionedMgSubs": {
       "value": [
         "17eb6f1c-6c57-4793-ae9b-2ed0b40bc1d1"
