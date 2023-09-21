@@ -14,7 +14,7 @@
         "value": "law-alz"
       },
       "ascExportResourceGroupName": {
-        "value": "asc-export-alz"
+        "value": "rg-ascexport-shd-001"
       },
       "ascExportResourceGroupLocation": {
         "value": "northeurope"
