@@ -58,7 +58,7 @@
       "value": true
     },
     "parAzBastionName": {
-      "value": "alz-bastion"
+      "value": "bas-alz"
     },
     "parAzBastionSku": {
       "value": "Standard"
@@ -76,10 +76,10 @@
       "value": false
     },
     "parAzFirewallName": {
-      "value": "alz-azfw-weu"
+      "value": "afw-alz-weu"
     },
     "parAzFirewallPoliciesName": {
-      "value": "alz-azfwpolicy-weu"
+      "value": "afwp-alz-weu"
     },
     "parAzFirewallTier": {
       "value": "Standard"
@@ -97,7 +97,7 @@
       "value": false
     },
     "parHubRouteTableName": {
-      "value": "alz-hub-routetable"
+      "value": "rt-alz-hub"
     },
     "parDisableBgpRoutePropagation": {
       "value": false
