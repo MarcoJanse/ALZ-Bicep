@@ -70,15 +70,15 @@ In order to setup the Accelerator framework with the production GitHub Action Wo
 1. Create your ALZ Bicep Accelerator framework with the following ALZ PowerShell Module cmdlet:
 
     ```powershell
-    New-ALZEnvironment -o <output_directory>
+    New-ALZEnvironment -o <output_directory> -IaC "bicep" -cicd "github
     ```
 
     > **Note:**
     > If the directory structure specified for the output location does not exist, the module will create the directory structure programatically.
 
-    Various prompts (listed below) will be displayed which will be used to replace parameter values as well as to create an environment variables file (.env) that will be used by the GitHub Action workflows.
+    Various prompts will be displayed which will be used to replace parameter values as well as to create an environment variables file (.env) that will be used by the GitHub Action workflows.
 
-1. Depending upon your preferred [network topology deployment](https://github.com/Azure/Enterprise-Scale/wiki/ALZ-Setup-azure#2-grant-access-to-user-andor-service-principal-at-root-scope--to-deploy-enterprise-scale-reference-implementation),  remove the associated workflow file for each deployment model
+1. Depending upon your preferred [network topology deployment](https://github.com/Azure/ALZ-Bicep/wiki/DeploymentFlow#network-topology-deployment),  remove the associated workflow file for each deployment model
     - Traditional VNet Hub and Spoke = .github\workflows\alz-bicep-4a-hubspoke.yml
     - Virtual WAN = .github\workflows\alz-bicep-4b-vwan.yml
 
@@ -101,7 +101,7 @@ In order to setup the Accelerator framework with the production GitHub Action Wo
     ```
 
 1. Now that the remote branch has the latest commit(s), you can configure your OpenID Connect (OIDC) identity provider with GitHub which will give the workflows access to your Azure environment.
-    1. [Create an Azure Active Directory service principal](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows#create-an-azure-active-directory-application-and-service-principal)
+    1. [Create an Microsoft Entra service principal](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows#create-an-azure-active-directory-application-and-service-principal)
     1. [Add your federated credentials](https://learn.microsoft.com/en-us/azure/developer/github/connect-from-azure?tabs=azure-portal%2Cwindows#add-federated-credentials)
         1. Add one federated credential with the entity type set to 'Branch' and with a value for "Based on Selection" set to 'main'
         1. Add a secondary federated credential with the entity type set to 'Pull Request'
@@ -135,12 +135,12 @@ In order to setup the Accelerator framework with the production ready Azure DevO
 
     ```powershell
     # Clones the remote repository to your local workstation
-    git clone https://ztrocinski@dev.azure.com/<OrganizationName>/<ProjectName>/_git/<RepositoryName>
+    git clone https://<OrganizationName>@dev.azure.com/<OrganizationName>/<ProjectName>/_git/<RepositoryName>
 
 1. Create your ALZ Bicep Accelerator framework with the following ALZ PowerShell Module cmdlet:
 
     ```powershell
-    New-ALZEnvironment -o <output_directory> -cicd "azuredevops"
+    New-ALZEnvironment -o <output_directory> -IaC "bicep" -cicd "azuredevops"
     ```
 
     > **Note:**
@@ -148,9 +148,9 @@ In order to setup the Accelerator framework with the production ready Azure DevO
 
     Various prompts will be displayed which will be used to replace parameter values as well as to create an environment variables file (.env) that will be used by the Azure DevOps pipelines.
 
-1. Depending upon your preferred [network topology deployment](https://github.com/Azure/Enterprise-Scale/wiki/ALZ-Setup-azure#2-grant-access-to-user-andor-service-principal-at-root-scope--to-deploy-enterprise-scale-reference-implementation),  remove the associated workflow file for each deployment model
-    - Traditional VNet Hub and Spoke = .azuredevops\workflows\alz-bicep-4a-hubspoke.yml
-    - Virtual WAN = .azuredevops\workflows\alz-bicep-4b-vwan.yml
+1. Depending upon your preferred [network topology deployment](https://github.com/Azure/ALZ-Bicep/wiki/DeploymentFlow#network-topology-deployment),  remove the associated pipeline file for each deployment model
+    - Traditional VNet Hub and Spoke = .azuredevops\pipelines\alz-bicep-4a-hubspoke.yml
+    - Virtual WAN = .azuredevops\pipelines\alz-bicep-4b-vwan.yml
 
     > **Note:**
     > These workflow files and associated deployment scripts will be programatically removed in the future.
@@ -219,16 +219,16 @@ With the ALZ Accelerator framework, we have designed the pipelines and directory
 
 1. Using the ALZ PowerShell Module, there is a cmdlet called `Get-ALZBicepRelease`. This will download a specified release version from the remote ALZ-Bicep repository and pull down to the local directory where your Accelerator framework was initially deployed.
 
-    Here is an example of using the cmdlet to pull down version v0.16.3:
+    Here is an example of using the cmdlet to pull down version v0.16.5:
 
     ```powershell
-    Get-ALZGithubRelease -githubRepoUrl "https://github.com/Azure/ALZ-Bicep" -releases "v0.16.3" -directoryForReleases "C:\Repos\ALZ\accelerator\upstream-releases\"
+    Get-ALZGithubRelease -githubRepoUrl "https://github.com/Azure/ALZ-Bicep" -release "v0.16.6" -directoryForReleases "C:\Repos\ALZ\accelerator\upstream-releases\"
     ```
 
-1. Once the ALZ Bicep release has been downloaded, you will need to update `upstream-releases-version` within the environment variables file (.env) with the version number of the release that you just downloaded. For example, if you downloaded v0.16.3, you would update the file with the following:
+1. Once the ALZ Bicep release has been downloaded, you will need to update `upstream-releases-version` within the environment variables file (.env) with the version number of the release that you just downloaded. For example, if you downloaded v0.16.5, you would update the file with the following:
 
     ```text
-    UPSTREAM_RELEASE_VERSION="v0.16.3"
+    UPSTREAM_RELEASE_VERSION="v0.16.5"
     ```
 
 1. You can now deploy the updated modules.
