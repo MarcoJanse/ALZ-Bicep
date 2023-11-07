@@ -9,12 +9,12 @@
       "value": "-mg"
     },
     "parIntRootMgSubs": {
+      "value": []
+    },
+    "parPlatformMgSubs": {
       "value": [
         "30ff91cf-356d-4e30-b506-7687c4599923"
       ]
-    },
-    "parPlatformMgSubs": {
-      "value": []
     },
     "parPlatformManagementMgSubs": {
       "value": []
@@ -29,7 +29,9 @@
       "value": []
     },
     "parLandingZonesCorpMgSubs": {
-      "value": []
+      "value": [
+        "b89c0508-fa65-459a-a4fa-7e3b1c907671"
+      ]
     },
     "parLandingZonesOnlineMgSubs": {
       "value": []
@@ -48,7 +50,7 @@
     },
     "parDecommissionedMgSubs": {
       "value": [
-        "17eb6f1c-6c57-4793-ae9b-2ed0b40bc1d1"
+        "4793dddc-52d6-4533-a49e-9293f4e569cd"
       ]
     },
     "parSandboxMgSubs": {

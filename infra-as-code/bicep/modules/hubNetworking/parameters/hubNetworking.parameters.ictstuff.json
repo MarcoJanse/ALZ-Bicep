@@ -58,7 +58,7 @@
       "value": true
     },
     "parAzBastionName": {
-      "value": "bas-alz"
+      "value": "bas-alz-shd-001"
     },
     "parAzBastionSku": {
       "value": "Standard"
@@ -70,7 +70,7 @@
       "value": false
     },
     "parDdosPlanName": {
-      "value": "alz-ddos-plan"
+      "value": "ddos-plan-alz"
     },
     "parAzFirewallEnabled": {
       "value": false
@@ -95,6 +95,9 @@
     },
     "parAzFirewallDnsProxyEnabled": {
       "value": false
+    },
+    "parAzFirewallDnsServers": {
+      "value": []
     },
     "parHubRouteTableName": {
       "value": "rt-alz-hub"
@@ -122,6 +125,7 @@
         "privatelink.azurecr.io",
         "privatelink.azure-devices.net",
         "privatelink.azure-devices-provisioning.net",
+        "privatelink.azuredatabricks.net",
         "privatelink.azurehdinsight.net",
         "privatelink.azurehealthcareapis.com",
         "privatelink.azurestaticapps.net",
@@ -195,7 +199,8 @@
           "asn": "65515",
           "bgpPeeringAddress": "",
           "peerWeight": "5"
-        }
+        },
+        "vpnClientConfiguration": {}
       }
     },
     "parExpressRouteGatewayConfig": {

@@ -8,17 +8,26 @@
     "parTopLevelManagementGroupSuffix": {
       "value": "-mg"
     },
+    "parPlatformMgAlzDefaultsEnable": {
+      "value": true
+    },
+    "parLandingZoneChildrenMgAlzDefaultsEnable": {
+      "value": true
+    },
+    "parLandingZoneMgConfidentialEnable": {
+      "value": false
+    },
     "parLogAnalyticsWorkSpaceAndAutomationAccountLocation": {
       "value": "westeurope"
     },
     "parLogAnalyticsWorkspaceResourceId": {
-      "value": "/subscriptions/30ff91cf-356d-4e30-b506-7687c4599923/resourceGroups/rg-logging-shared-001/providers/Microsoft.OperationalInsights/workspaces/alz-log-analytics"
+      "value": "/subscriptions/30ff91cf-356d-4e30-b506-7687c4599923/resourceGroups/rg-pltf-logging-shd-001/providers/Microsoft.OperationalInsights/workspaces/log-alz-shd-001"
     },
     "parLogAnalyticsWorkspaceLogRetentionInDays": {
       "value": "365"
     },
     "parAutomationAccountName": {
-      "value": "alz-automation-account"
+      "value": "aa-alz-shd-001"
     },
     "parMsDefenderForCloudEmailSecurityContact": {
       "value": "marco.janse@ictstuff.info"
@@ -27,7 +36,7 @@
       "value": ""
     },
     "parPrivateDnsResourceGroupId": {
-      "value": "/subscriptions/30ff91cf-356d-4e30-b506-7687c4599923/resourceGroups/rg-hubnetworking-shared-001"
+      "value": "/subscriptions/30ff91cf-356d-4e30-b506-7687c4599923/resourceGroups/rg-pltf-hubnetworking-shd-001"
     },
     "parPrivateDnsZonesNamesToAuditInCorp": {
       "value": []
