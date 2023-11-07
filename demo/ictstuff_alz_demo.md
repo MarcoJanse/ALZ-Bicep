@@ -10,8 +10,12 @@
     - [Policies](#policies)
     - [Custom Role Definitions](#custom-role-definitions)
     - [Logging, Automation and Sentinel](#logging-automation-and-sentinel)
-    - [Management Groups Diagnostic Settings](#management-groups-diagnostic-settings)
     - [Hub networking](#hub-networking)
+    - [Role Assignments for Management Groups and Subscriptions](#role-assignments-for-management-groups-and-subscriptions)
+    - [Subscription Placement](#subscription-placement)
+    - [Built-in and Custom Policy assignments](#built-in-and-custom-policy-assignments)
+      - [alzDefaultPolicyAssignments.ictstuff.bicep - Changes](#alzdefaultpolicyassignmentsictstuffbicep---changes)
+      - [alzDefaultPolicyAssignments.parameters.ictstuff.json](#alzdefaultpolicyassignmentsparametersictstuffjson)
 
 ## Introduction
 
@@ -124,7 +128,7 @@ $parPolDefDeploy = @{
 - After that, run the `New-AzManagementGroupDeployment` using the created variable for all parameters
 
 ```powershell
-New-AzManagementGroupDeployment @parPolDefDeploy -Verbose
+New-AzManagementGroupDeployment @parPolDefDeploy -WhatIf
 ```
 
 ### Custom Role Definitions
@@ -155,7 +159,7 @@ $parRoleDefsDeploy = @{
 - After that, run the `New-AzManagementGroupDeployment` using the created variable for all parameters
 
 ```powershell
-New-AzManagementGroupDeployment @parRoleDefsDeploy -Verbose
+New-AzManagementGroupDeployment @parRoleDefsDeploy -WhatIf
 ```
 
 ### Logging, Automation and Sentinel
@@ -196,8 +200,7 @@ New-AzResourceGroup `
 - Deploy the Logging bicep module using the command below:
 
 ```powershell
-New-AzResourceGroupDeployment @parLogDeploy -Verbose
-```
+New-AzResourceGroupDeployment @parLogDeploy -WhatIf
 
 ### Management Groups Diagnostic Settings
 
@@ -227,7 +230,7 @@ $parMgDiagDeploy = @{
 Deploy the Diagnostics settings bicep template using the command below:
 
 ```powershell
- New-AzManagementGroupDeployment @parMgDiagDeploy -Verbose
+ New-AzManagementGroupDeployment @parMgDiagDeploy -WhatIf
  ```
 
 ### Hub networking
@@ -306,3 +309,166 @@ New-AzResourceGroup `
 New-AzResourceGroupDeployment @parHubNetworkDeploy -WhatIf
 ```
 
+### Role Assignments for Management Groups and Subscriptions
+
+> The example below is to assign a Readers role to a security group: **sg-ictstuff-readers**
+
+- Copy the bicep file `infra-as-code\bicep\modules\roleAssignments\parameters\roleAssignmentManagementGroup.securityGroup.parameters.all.json` and rename it.
+  - In mÿ case, I renamed it to `infra-as-code\bicep\modules\roleAssignments\parameters\roleAssignmentManagementGroup.securityGroup.parameters.ictstuff.json`
+    - Remove the `parRoleAssignmentNameGuid` code block. This is optional and will be constructed by the `roleAssignmentResourceGroup.bicep`-file.
+    - `parRoleDefinitionId` with the GUID of the (built-in) role definition. See [Azure built-in roles | MS-Learn](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles). For example, the built-in Reader role has the following GUID: `acdd72a7-3385-48ef-bd42-f606fba81ae7`
+    - `parAssigneeObjectId` with the objectID of your security group. In my example, I use `sg-ictstuff-readers`. (But I won't display the GUID here...)
+- Making sure you are logged in to Azure with the Az PowerShell module, create the `inputobject` below:
+
+```powershell
+$parRoleAssignDeploy    = @{
+  DeploymentName        = 'ictstuff-RoleAssignmentsDeploy-{0}' -f (-join (Get-Date -Format 'yyyyMMddTHHMMssffffZ')[0..63])
+  Location              = 'westeurope'
+  ManagementGroupId     = 'alz-mg'
+  TemplateFile          = "infra-as-code/bicep/modules/roleAssignments/roleAssignmentManagementGroup.bicep"
+  TemplateParameterFile = 'infra-as-code/bicep/modules/roleAssignments/parameters/roleAssignmentManagementGroup.securityGroup.parameters.ictstuff.json'
+}
+```
+
+Next, create the role assignment:
+
+```powershell
+New-AzManagementGroupDeployment @parRoleAssignDeploy -WhatIf
+```
+
+### Subscription Placement
+
+- Copy the bicep file `infra-as-code\bicep\orchestration\subPlacementAll\parameters\subPlacementAll.parameters.all.json` and rename it.
+  - In mÿ case, I renamed it to `infra-as-code\bicep\orchestration\subPlacementAll\parameters\subPlacementAll.parameters.ictstuff.json`
+  - Review/change the following parameters
+    - `parTopLevelManagementGroupPrefix`
+      - I kept mine set to `alz`
+    - `parTopLevelManagementGroupSuffix`
+      - Changed this to `-mg`
+    - Next, I added my subscription ID's under the following management groups:
+      - `parIntRootMgSubs`
+      - `parDecommissionedMgSubs`
+- Making sure you are logged in to Azure with the Az PowerShell module, create the `inputobject` below:
+
+```powershell
+$parSubPlacementDeploy  = @{
+  DeploymentName        = 'ictstuff-SubPlacementAll-{0}' -f (-join (Get-Date -Format 'yyyyMMddTHHMMssffffZ')[0..63])
+  Location              = 'westeurope'
+  ManagementGroupId     = 'alz-mg'
+  TemplateFile          = "infra-as-code/bicep/orchestration/subPlacementAll/subPlacementAll.bicep"
+  TemplateParameterFile = 'infra-as-code/bicep/orchestration/subPlacementAll/parameters/subPlacementAll.parameters.ictstuff.json'
+}
+```
+
+Next, deploy the subscription placement using below code
+
+```powershell
+New-AzManagementGroupDeployment @parSubPlacementDeploy -WhatIf
+```
+
+### Built-in and Custom Policy assignments
+
+> **NOTE** Because I only have 2 subscriptions to deploy resources to, I do the following:
+>
+> 1. Put my first subscription under the platform-mg management group
+> 2. Assign all platform-management, platform-identity, and platform-connectivity policies to the platform top-level management group
+> 3. Place the other subscription under the landingzone-corp-mg management group.
+
+- On your system, make sure you are in the root of the ALZ-Bicep git repo.
+- Open Code in this folder: `code .`
+- Copy the `infra-as-code/bicep/modules/policy/assignments/alzDefaults/alzDefaultPolicyAssignments.bicep`
+  - In my case I renamed it to `infra-as-code/bicep/modules/policy/assignments/alzDefaults/alzDefaultPolicyAssignments.ictstuff.bicep`
+  - Edit this file and change line 332-334 and change the last part of each line:
+    - Change `platform-management$` to `platform$`
+    - Change `platform-connectivity$` to `platform$`
+    - Change `platform-identity$` to `platform$`
+- Copy the bicep file `infra-as-code\bicep\modules\policy\assignments\alzDefaults\parameters\alzDefaultPolicyAssignments.parameters.all.json` and rename it.
+  - In mÿ case, I renamed it to `infra-as-code\bicep\modules\policy\assignments\alzDefaults\parameters\alzDefaultPolicyAssignments.parameters.ictstuff.json`
+    - Exclude the policies you do not want to assign using the `parExcludedPolicyAssignments`-array in the parameter file.
+
+Below you find the 3 lines that changed:
+
+#### alzDefaultPolicyAssignments.ictstuff.bicep - Changes
+
+```powershell
+  platformManagement: parPlatformMgAlzDefaultsEnable ? '${parTopLevelManagementGroupPrefix}-platform-management${parTopLevelManagementGroupSuffix}' : '${parTopLevelManagementGroupPrefix}-platform${parTopLevelManagementGroupSuffix}'
+  platformConnectivity: parPlatformMgAlzDefaultsEnable ? '${parTopLevelManagementGroupPrefix}-platform-connectivity${parTopLevelManagementGroupSuffix}' : '${parTopLevelManagementGroupPrefix}-platform${parTopLevelManagementGroupSuffix}'
+  platformIdentity: parPlatformMgAlzDefaultsEnable ? '${parTopLevelManagementGroupPrefix}-platform-identity${parTopLevelManagementGroupSuffix}' : '${parTopLevelManagementGroupPrefix}-platform${parTopLevelManagementGroupSuffix}'
+```
+
+#### alzDefaultPolicyAssignments.parameters.ictstuff.json
+
+```json
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "parTopLevelManagementGroupPrefix": {
+      "value": "alz"
+    },
+    "parTopLevelManagementGroupSuffix": {
+      "value": "-mg"
+    },
+    "parLogAnalyticsWorkSpaceAndAutomationAccountLocation": {
+      "value": "westeurope"
+    },
+    "parLogAnalyticsWorkspaceResourceId": {
+      "value": "/subscriptions/30ff91cf-356d-4e30-b506-7687c4599923/resourceGroups/rg-pltf-logging-shd-001/providers/Microsoft.OperationalInsights/workspaces/log-alz-shd-001"
+    },
+    "parLogAnalyticsWorkspaceLogRetentionInDays": {
+      "value": "365"
+    },
+    "parAutomationAccountName": {
+      "value": "aa-alz-shd-001"
+    },
+    "parMsDefenderForCloudEmailSecurityContact": {
+      "value": "marco.janse@ictstuff.info"
+    },
+    "parDdosProtectionPlanId": {
+      "value": ""
+    },
+    "parPrivateDnsResourceGroupId": {
+      "value": "/subscriptions/30ff91cf-356d-4e30-b506-7687c4599923/resourceGroups/rg-hubnetworking-shared-001"
+    },
+    "parPrivateDnsZonesNamesToAuditInCorp": {
+      "value": []
+    },
+    "parDisableAlzDefaultPolicies": {
+      "value": false
+    },
+    "parVmBackupExclusionTagName" : {
+      "value": "BackupPolicy"
+    },
+    "parVmBackupExclusionTagValue" : {
+      "value": [
+        "ExcludedFromBackup"
+      ]
+    },
+    "parExcludedPolicyAssignments": {
+      "value": [
+        "Deny-Public-IP",
+        "Enable-DDoS-VNET"
+      ]
+    },
+    "parTelemetryOptOut": {
+      "value": false
+    }
+  }
+}
+```
+
+```powershell
+$parPolicyAssignmentDeploy  = @{
+  DeploymentName            = 'alz-alzPolicyAssignmentDefaultsDeployment-{0}' -f (-join (Get-Date -Format 'yyyyMMddTHHMMssffffZ')[0..63])
+  Location                  = 'westeurope'
+  ManagementGroupId         = 'alz-mg'
+  TemplateFile              = "infra-as-code/bicep/modules/policy/assignments/alzDefaults/alzDefaultPolicyAssignments.ictstuff.bicep"
+  TemplateParameterFile     = 'infra-as-code/bicep/modules/policy/assignments/alzDefaults/parameters/alzDefaultPolicyAssignments.parameters.ictstuff.json'
+}
+```
+
+Verify the deployment
+
+```powershell
+New-AzManagementGroupDeployment @parPolicyAssignmentDeploy -WhatIf
+```
