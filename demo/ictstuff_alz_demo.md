@@ -10,6 +10,7 @@
     - [Policies](#policies)
     - [Custom Role Definitions](#custom-role-definitions)
     - [Logging, Automation and Sentinel](#logging-automation-and-sentinel)
+    - [Management Groups Diagnostic Settings](#management-groups-diagnostic-settings)
     - [Hub networking](#hub-networking)
     - [Role Assignments for Management Groups and Subscriptions](#role-assignments-for-management-groups-and-subscriptions)
     - [Subscription Placement](#subscription-placement)
@@ -201,6 +202,7 @@ New-AzResourceGroup `
 
 ```powershell
 New-AzResourceGroupDeployment @parLogDeploy -WhatIf
+```
 
 ### Management Groups Diagnostic Settings
 
