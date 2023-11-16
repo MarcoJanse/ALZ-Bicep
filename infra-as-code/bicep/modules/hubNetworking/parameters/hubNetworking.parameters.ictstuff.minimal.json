@@ -58,10 +58,13 @@
       "value": false
     },
     "parAzBastionName": {
-      "value": "bas-alz-sdh-001"
+      "value": "bas-alz-shd-001"
     },
     "parAzBastionSku": {
       "value": "Standard"
+    },
+    "parAzBastionTunneling": {
+      "value": false
     },
     "parAzBastionNsgName": {
       "value": "nsg-AzureBastionSubnet"
@@ -83,6 +86,9 @@
     },
     "parAzFirewallTier": {
       "value": "Standard"
+    },
+    "parAzFirewallIntelMode": {
+      "value": "Alert"
     },
     "parAzFirewallAvailabilityZones": {
       "value": []
